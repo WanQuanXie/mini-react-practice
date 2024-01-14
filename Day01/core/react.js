@@ -20,3 +20,22 @@ export function createElement(type, props, ...children) {
     }
 }
 
+export function render(el, container) {
+    const isTextEl = el.type === "TEXT_ELEMENT";
+    const dom = isTextEl ? document.createTextNode(el.props.nodeValue) : document.createElement(el.type);
+
+    Object.keys(el.props).forEach(key => {
+        if (key !== 'children') {
+            dom[key] = el.props[key];
+        }
+    })
+
+    if (!isTextEl) {
+        el.props.children.forEach((el) => {
+            // 这里递归添加所有的子节点
+            render(el, dom);
+        })
+    }
+
+    container.append(dom);
+}

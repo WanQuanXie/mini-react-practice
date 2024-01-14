@@ -130,4 +130,4 @@ import { createElement } from './core/react.js';
 import ReactDom from './core/react-dom.js';
 
 const App = createElement('div', { id: 'app' }, 'mini-', 'react-', 'demo')
-ReactDom.createRoot(App, document.getElementById('root'));
+ReactDom.createRoot(document.getElementById('root')).render(App);
