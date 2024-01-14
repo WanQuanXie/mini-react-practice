@@ -37,41 +37,89 @@
 // document.getElementById('root').append(app);
 
 // V2 将节点的创建过程使用函数封装起来，以便能更动态化创建不同的节点
-function createElement(type, props, ...children) {
-    return {
-        type,
-        props: {
-            ...props,
-            children
-        }
-    }
-}
+// function createElement(type, props, ...children) {
+//     return {
+//         type,
+//         props: {
+//             ...props,
+//             children
+//         }
+//     }
+// }
 
-function createTextElement(nodeValue, props) {
+// function createTextElement(nodeValue, props) {
+//     return {
+//         type: "TEXT_ELEMENT",
+//         props: {
+//             ...props,
+//             nodeValue
+//         }
+//     }
+// }
+
+// const textEl = createTextElement('textNode');
+
+// const appEl = createElement('div', { id: 'app' }, textEl);
+
+// const app = document.createElement(appEl.type);
+
+// Object.keys(appEl.props).forEach(key => {
+//     if (key !== 'children') {
+//         app[key] = appEl[key];
+//     }
+// })
+
+// appEl.props.children.forEach((el) => {
+//     const textNode = document.createTextNode(el.props.nodeValue);
+//     app.append(textNode);
+// })
+
+// document.getElementById('root').append(app);
+
+
+// V3 将 dom 节点的创建和渲染也封装到一个函数里
+function createTextElement(nodeValue) {
     return {
         type: "TEXT_ELEMENT",
         props: {
-            ...props,
             nodeValue
         }
     }
 }
 
-const textEl = createTextElement('textNode');
-
-const appEl = createElement('div', { id: 'app' }, textEl);
-
-const app = document.createElement(appEl.type);
-
-Object.keys(appEl.props).forEach(key => {
-    if (key !== 'children') {
-        app[key] = appEl[key];
+function createElement(type, props, ...children) {
+    return {
+        type,
+        props: {
+            ...props,
+            // 这里优化一下子节点对象的处理，以便外边调用该方法创建节点对象，不需要在传入 textNode 类型时先创建再传入
+            children: children.map(child => {
+                return typeof child === "string" ? createTextElement(child) : child
+            })
+        }
     }
-})
+}
 
-appEl.props.children.forEach((el) => {
-    const textNode = document.createTextNode(el.props.nodeValue);
-    app.append(textNode);
-})
+function render(el, container) {
+    const isTextEl = el.type === "TEXT_ELEMENT";
+    const dom = isTextEl ? document.createTextNode(el.props.nodeValue) : document.createElement(el.type);
 
-document.getElementById('root').append(app);
+    Object.keys(el.props).forEach(key => {
+        if (key !== 'children') {
+            dom[key] = el.props[key];
+        }
+    })
+
+    if (!isTextEl) {
+        el.props.children.forEach((el) => {
+            // 这里递归添加所有的子节点
+            render(el, dom);
+        })
+    }
+
+    container.append(dom);
+}
+
+const App = createElement('div', { id: 'app' }, 'mini-', 'react-', 'demo')
+
+render(App, document.getElementById('root'));
