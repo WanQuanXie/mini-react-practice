@@ -78,48 +78,56 @@
 
 
 // V3 将 dom 节点的创建和渲染也封装到一个函数里
-function createTextElement(nodeValue) {
-    return {
-        type: "TEXT_ELEMENT",
-        props: {
-            nodeValue
-        }
-    }
-}
+// function createTextElement(nodeValue) {
+//     return {
+//         type: "TEXT_ELEMENT",
+//         props: {
+//             nodeValue
+//         }
+//     }
+// }
 
-function createElement(type, props, ...children) {
-    return {
-        type,
-        props: {
-            ...props,
-            // 这里优化一下子节点对象的处理，以便外边调用该方法创建节点对象，不需要在传入 textNode 类型时先创建再传入
-            children: children.map(child => {
-                return typeof child === "string" ? createTextElement(child) : child
-            })
-        }
-    }
-}
+// function createElement(type, props, ...children) {
+//     return {
+//         type,
+//         props: {
+//             ...props,
+//             // 这里优化一下子节点对象的处理，以便外边调用该方法创建节点对象，不需要在传入 textNode 类型时先创建再传入
+//             children: children.map(child => {
+//                 return typeof child === "string" ? createTextElement(child) : child
+//             })
+//         }
+//     }
+// }
 
-function render(el, container) {
-    const isTextEl = el.type === "TEXT_ELEMENT";
-    const dom = isTextEl ? document.createTextNode(el.props.nodeValue) : document.createElement(el.type);
+// function render(el, container) {
+//     const isTextEl = el.type === "TEXT_ELEMENT";
+//     const dom = isTextEl ? document.createTextNode(el.props.nodeValue) : document.createElement(el.type);
 
-    Object.keys(el.props).forEach(key => {
-        if (key !== 'children') {
-            dom[key] = el.props[key];
-        }
-    })
+//     Object.keys(el.props).forEach(key => {
+//         if (key !== 'children') {
+//             dom[key] = el.props[key];
+//         }
+//     })
 
-    if (!isTextEl) {
-        el.props.children.forEach((el) => {
-            // 这里递归添加所有的子节点
-            render(el, dom);
-        })
-    }
+//     if (!isTextEl) {
+//         el.props.children.forEach((el) => {
+//             // 这里递归添加所有的子节点
+//             render(el, dom);
+//         })
+//     }
 
-    container.append(dom);
-}
+//     container.append(dom);
+// }
+
+// const App = createElement('div', { id: 'app' }, 'mini-', 'react-', 'demo')
+
+// render(App, document.getElementById('root'));
+
+// V4 将节点数据对象创建的封装逻辑和 dom 节点创建、渲染的封装逻辑，分别抽离到独立文件进行模块化管理，以便未来进一步对各自进行迭代优化
+// 这里就只变成纯粹的应用主入口，不包含任何的框架逻辑和 UI 处理逻辑，只需关注业务逻辑即可
+import { createElement } from './core/react.js';
+import ReactDom from './core/react-dom.js';
 
 const App = createElement('div', { id: 'app' }, 'mini-', 'react-', 'demo')
-
-render(App, document.getElementById('root'));
+ReactDom.createRoot(App, document.getElementById('root'));
